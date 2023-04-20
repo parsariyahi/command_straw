@@ -19,7 +19,9 @@ class Client:
     def run_command(self):
         return self.loop.run_until_complete(self.__async_run_command())
 
+    def close(self):
+        self._conn.close()
+
     async def __async_run_command(self):
-        async with self._conn as conn :
-            await conn.send(self.command)
-            return await conn.recieve()
+        await self._conn.send(self.command)
+        return await self._conn.recieve()
