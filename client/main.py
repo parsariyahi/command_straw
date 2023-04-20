@@ -13,7 +13,16 @@ if __name__ == "__main__" :
         )
 
     cl = Client(command)
-    resp = cl.run_command()
-    print(resp)
-    resp = cl.run_command()
-    print(resp)
+    cl2 = Client(command)
+    cl3 = Client(command)
+    for i in range(0, 1000) :
+        resp = cl.run_command()
+        print(resp)
+        resp2 = cl2.run_command()
+        print(resp2)
+        resp3 = cl3.run_command()
+        print(resp3)
+
+    cl.close()
+    cl2.close()
+    cl3.close()
