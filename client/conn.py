@@ -9,9 +9,9 @@ class Conn:
     ) -> None:
         self.port = port
         self.host = host
+        self._context = zmq.asyncio.Context()
     
     async def __aenter__(self):
-        self._context = zmq.asyncio.Context()
         self._socket = self._context.socket(zmq.REQ)
         self._socket.connect(
             "tcp://{}:{}".format(self.host, self.port)
@@ -19,7 +19,7 @@ class Conn:
         return self
 
     async def __aexit__(self, *args, **kwargs):
-        self._context.destroy()
+        self._socket.close()
 
     async def send(self, command):
         await self._socket.send_json(command)
