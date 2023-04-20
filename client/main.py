@@ -1,7 +1,7 @@
 import os, json
 from client import Client
 
-if __name__ == "__main__" :
+def main() :
     # Get json file name and generate the path
     json_file_name =  input("Enter your json file name: ")
     current_path = os.path.dirname(__file__)
@@ -26,3 +26,6 @@ if __name__ == "__main__" :
     cl.close()
     cl2.close()
     cl3.close()
+
+if __name__ == "__main__" :
+    main()
