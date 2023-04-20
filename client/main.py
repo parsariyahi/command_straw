@@ -15,3 +15,5 @@ if __name__ == "__main__" :
     cl = Client(command)
     resp = cl.run_command()
     print(resp)
+    resp = cl.run_command()
+    print(resp)
