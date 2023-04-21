@@ -1,9 +1,5 @@
 {
     "command_type": "os",
-    "command_name": "ls",
-    "parameters":
-    [
-    "-l",
-    "-h"
-    ]
+    "command_name": "dir",
+    "parameters": []
 }
