@@ -1,8 +1,8 @@
 class MathExeciter:
 
     @classmethod
-    def execute(cls, expression):
-        return eval(expression)
+    def execute(cls, command):
+        return eval(command["expression"])
 
     def _clean_data_for_response(cls, result, expression) :
         return {
