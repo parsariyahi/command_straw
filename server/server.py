@@ -1,7 +1,8 @@
 import sys
 import asyncio
 import zmq.asyncio
-from executer import Executer
+
+from core.executer import Executer
 
 class Conn:
 
@@ -63,21 +64,16 @@ class Server:
 
         return data
 
-    async def __async_command_result(self, res):
-        data = {
-            'status': 'okj',
-            'result': res
-        }
-
-        await self._conn.send(data)
+    async def __async_send_response(self, response):
+        await self._conn.send(response)
     
     async def _main(self):
         while True:
             command = await self.__async_read_command()
 
-            result = Executer.execute(command)
+            response = Executer.execute(command)
 
-            await self.__async_command_result(result)
+            await self.__async_send_response(response)
 
     def start(self) :
         asyncio.ensure_future(
