@@ -1,3 +1,5 @@
+import sys
+import asyncio
 import os, json
 from client import Client
 

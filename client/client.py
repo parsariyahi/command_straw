@@ -1,7 +1,5 @@
 import sys
 import asyncio
-from conn import Conn
-
 import zmq.asyncio
 
 class Conn:
