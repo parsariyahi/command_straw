@@ -2,16 +2,39 @@ import sys
 import asyncio
 from conn import Conn
 
+import zmq.asyncio
 
-if "win" in sys.platform:
-    # RuntimeWarning: Proactor event loop does not implement add_reader family of methods required for zmq.
-    # Registering an additional selector thread for add_reader support via tornado.
-    # Use `asyncio.set_event_loop_policy(WindowsSelectorEventLoopPolicy())` to avoid this warning.
-    asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+class Conn:
+
+    def __init__(
+        self,
+        host: str,
+        port: int,
+    ) -> None:
+        self.port = port
+        self.host = host
+        self._context = zmq.asyncio.Context()
+        self._socket = self._context.socket(zmq.REQ)
+        self._socket.connect(
+            "tcp://{}:{}".format(self.host, self.port)
+        )
+
+    async def send(self, command):
+        await self._socket.send_json(command)
+
+    async def recieve(self) :
+        resp = await self._socket.recv_json()
+
+        return resp
+
+    def close(self):
+        self._context.destroy()
+
+
 
 class Client:
 
-    def __init__(self, command) -> None:
+    def __init__(self, command: dict) -> None:
         self.command = command
         self._conn = Conn("localhost", 5555)
         self.loop = asyncio.get_event_loop()
