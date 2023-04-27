@@ -1,4 +1,3 @@
-import sys
 import asyncio
 import zmq.asyncio
 
@@ -19,13 +18,6 @@ class Conn:
             "tcp://{}:{}".format(self.host, self.port)
         )
 
-    async def __aenter__(self):
-        return self
-
-    async def __aexit__(self, *args, **kwargs):
-        # self._socket.close()
-        pass
-
     async def send(self, result):
         await self._socket.send_json(result)
 
@@ -42,17 +34,6 @@ class Server:
     def __init__(self) -> None:
         self._conn = Conn('*', 5555)
         self._loop = asyncio.get_event_loop()
-
-    def listen(self):
-        self._loop.run_forever()
-        print('asdkfjdsakjflksdjaf')
-
-    def listen(self) :
-        data = self._loop.create_task(
-            self.__async_read_command()
-        )
-
-        return data
 
     async def __async_read_command(self) :
         data = await self._conn.recieve()
