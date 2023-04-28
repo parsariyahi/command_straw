@@ -19,8 +19,8 @@ class Conn:
             "tcp://{}:{}".format(self.host, self.port)
         )
 
-    def send(self, result):
-        self._socket.send_json(result)
+    async def send(self, result):
+        await self._socket.send_json(result)
 
     async def recieve(self) :
         resp = await self._socket.recv_json()
@@ -41,16 +41,12 @@ class Server:
 
         return data
 
-    def __async_send_response(self, response):
-        self._conn.send(response)
+    async def __async_send_response(self, response):
+        await self._conn.send(response)
 
     async def run_command(self, command):
         response = await Executer.execute(command)
-        self.__async_send_response(response)
-
-    async def run(self):
-        command = await self.__async_read_command()
-        await self.run_command(command)
+        await self.__async_send_response(response)
 
     async def _main(self):
         while True:
