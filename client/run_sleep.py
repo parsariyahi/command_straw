@@ -3,23 +3,6 @@ import asyncio
 import os, json
 from client import Client
 
-def get_file_path() :
-
-    # Get json file name and generate the path
-    json_file_name =  input("Enter your json file name: ")
-    current_path = os.path.dirname(__file__)
-    json_file_path = os.path.join(current_path, json_file_name)
-
-    with open(json_file_path) as file:
-        command = json.loads(
-            file.read()
-        )
-
-    cl = Client(command)
-    for i in range(0, 1) :
-        resp = cl.run_command()
-        print(resp)
-
 def run_commnad():
 
     command = {
@@ -28,15 +11,28 @@ def run_commnad():
         "parameters": [
             "127.0.0.1",
             "-n",
-            "6",
+            "5",
+        ]
+    }
+
+    command2 = {
+        "command_type": "os",
+        "command_name": "ping",
+        "parameters": [
+            "127.0.0.1",
+            "-n",
+            "5",
         ]
     }
 
     client = Client(command)
+    client2 = Client(command)
 
     resp = client.run_command()
+    resp2 = client2.run_command()
 
     print(resp)
+    print(resp2)
 
 def main():
     run_commnad()

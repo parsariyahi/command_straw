@@ -1,5 +1,9 @@
 {
     "command_type": "os",
-    "command_name": "dir",
-    "parameters": []
+    "command_name": "ping",
+    "parameters": [
+        "127.0.0.1",
+        "-n",
+        "6"
+    ]
 }
