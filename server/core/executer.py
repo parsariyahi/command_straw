@@ -1,13 +1,11 @@
-import subprocess
-
 from .factory import ExecuterFactory
 
 class Executer:
 
     @classmethod
-    def execute(cls, command):
-        executer = ExecuterFactory.get_executer(command["command_type"])
+    async def execute(cls, command):
+        executer = await ExecuterFactory.get_executer(command["command_type"])
 
-        result = executer.execute(command)
+        result = await executer.execute(command)
 
         return result
