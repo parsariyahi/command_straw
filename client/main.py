@@ -3,7 +3,7 @@ import asyncio
 import os, json
 from client import Client
 
-def get_file_path() :
+def main() :
 
     # Get json file name and generate the path
     json_file_name =  input("Enter your json file name: ")
@@ -19,27 +19,6 @@ def get_file_path() :
     for i in range(0, 1) :
         resp = cl.run_command()
         print(resp)
-
-def run_commnad():
-
-    command = {
-        "command_type": "os",
-        "command_name": "ping",
-        "parameters": [
-            "127.0.0.1",
-            "-n",
-            "6",
-        ]
-    }
-
-    client = Client(command)
-
-    resp = client.run_command()
-
-    print(resp)
-
-def main():
-    run_commnad()
 
 if __name__ == "__main__" :
     if "win" in sys.platform:
