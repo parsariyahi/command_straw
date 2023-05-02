@@ -14,45 +14,49 @@ class Conn:
         self.port = port
         self.host = host
         self._context = zmq.asyncio.Context()
-        self._socket = self._context.socket(zmq.REP)
+        self._socket = self._context.socket(zmq.ROUTER)
         self._socket.bind(
             "tcp://{}:{}".format(self.host, self.port)
         )
+        self.poller = zmq.asyncio.Poller()
+        self.poller.register(self._socket, zmq.POLLIN)
 
-    async def send(self, result):
-        await self._socket.send_json(result)
+    async def send(self, uid, result):
+        response = json.dumps(result, indent=2).encode("utf-8")
+        await self._socket.send_multipart((uid, response))
 
     async def recieve(self) :
-        resp = await self._socket.recv_json()
+        uid, request = await self._socket.recv_multipart()
 
-        return resp
+        return uid, request
 
     def close(self):
         self._context.destroy()
 
 
 class Server:
-    def __init__(self) -> None:
-        self._conn = Conn('*', 5555)
+    def __init__(self, host="*", port=5555) -> None:
+        self._conn = Conn(host, port)
         self._loop = asyncio.get_event_loop()
 
-    async def __async_read_command(self) :
-        data = await self._conn.recieve()
-
-        return data
-
-    async def __async_send_response(self, response):
-        await self._conn.send(response)
-
-    async def run_command(self, command):
+    async def _execute_command(self, command):
         response = await Executer.execute(command)
-        await self.__async_send_response(response)
+        return response
 
-    async def _main(self):
+    async def _request_handler(self, uid, request):
+        command = json.loads(request.decode())
+        print(f"command is: {command}")
+        result = await self._execute_command(command)
+        print(f"result is: {result}")
+        await self._conn.send(uid, result)
+
+    async def listen(self):
         while True:
-            data = await self._conn.recieve()
-            self._loop.create_task(self.run_command(data))
+            print("listening")
+            socks = dict(await self._conn.poller.poll())
+            print(socks)
 
-    def start(self) :
-        asyncio.ensure_future(self._main())
-        self._loop.run_forever()
+            if self._conn._socket in socks:
+                uid, request = await self._conn.recieve()
+                print(request, uid)
+                asyncio.create_task(self._request_handler(uid, request))
