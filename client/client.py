@@ -1,4 +1,5 @@
-import sys
+import os
+import json
 import asyncio
 import zmq.asyncio
 
@@ -12,18 +13,19 @@ class Conn:
         self.port = port
         self.host = host
         self._context = zmq.asyncio.Context()
-        self._socket = self._context.socket(zmq.REQ)
+        self._socket = self._context.socket(zmq.DEALER)
         self._socket.connect(
-            "tcp://{}:{}".format(self.host, self.port)
-        )
+            "tcp://{}:{}".format(self.host, self.port))
+        self.poller = zmq.asyncio.Poller()
+        self.poller.register(self._socket, zmq.POLLIN)
 
     async def send(self, command):
         await self._socket.send_json(command)
 
     async def recieve(self) :
-        resp = await self._socket.recv_json()
+        response = await self._socket.recv_json()
 
-        return resp
+        return response
 
     def close(self):
         self._context.destroy()
@@ -32,17 +34,29 @@ class Conn:
 
 class Client:
 
-    def __init__(self, command: dict) -> None:
-        self.command = command
-        self._conn = Conn("localhost", 5555)
-        self.loop = asyncio.get_event_loop()
+    def __init__(self, host="127.0.0.1", port=5555) -> None:
+        self._conn = Conn(host, port)
+        self._loop = asyncio.get_event_loop()
 
-    def run_command(self):
-        return self.loop.run_until_complete(self.__async_run_command())
+    def set_input_file(self, file_name):
+        current_path = os.path.dirname(__file__)
+        json_file_path = os.path.join(current_path, file_name)
 
-    async def __async_run_command(self):
+        with open(json_file_path) as file:
+            self.command = json.loads(file.read())
+
+    async def _run_command(self):
         await self._conn.send(self.command)
-        return await self._conn.recieve()
+
+    async def _get_result(self):
+        response = await self._conn.recieve()
+        return response
+
+    async def start(self):
+        sockets = await self._conn.poller.poll(10)
+        await self._run_command()
+        result = await self._get_result()
+        print(result)
 
     def close(self):
         self._conn.close()

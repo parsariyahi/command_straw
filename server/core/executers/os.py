@@ -1,4 +1,4 @@
-import subprocess
+import asyncio
 
 
 class OSExecuter:
@@ -6,25 +6,16 @@ class OSExecuter:
     @classmethod
     async def execute(cls, command):
         command = await cls._clean_command_to_execute(command)
+        command_str = await cls._build_command(command)
+        proc = await asyncio.subprocess.create_subprocess_shell(
+                command_str, stdout=asyncio.subprocess.PIPE,
+                stderr=asyncio.subprocess.PIPE)
 
-        output = await cls._async_run(command)
+        stdout = await proc.stdout.read()
 
-        if output.returncode: # If return code is NonZero
-            result = output.stderr
-        else :
-            result = output.stdout
+        result = await cls._clean_data_for_response(command_str, stdout.decode())
 
-        command = await cls._join_command_args(command)
-        response = await cls._clean_data_for_response(command, result)
-
-        return response
-
-    @classmethod
-    async def _async_run(cls, command) :
-        output = subprocess.run(command, shell=True, 
-                                capture_output=True, text=True)
-        return output
-
+        return result
 
     @classmethod
     async def _clean_command_to_execute(cls, command) :
@@ -34,12 +25,12 @@ class OSExecuter:
         return [actual_command] + args
 
     @classmethod
-    async def _join_command_args(cls, command_args) :
-        return " ".join(command_args)
+    async def _build_command(cls, command_list) :
+        return " ".join(command_list)
 
     @classmethod
-    async def _clean_data_for_response(cls, command, result):
+    async def _clean_data_for_response(cls, command, stdout):
         return {
             "given_os_command": command,
-            "result": result,
+            "result": stdout,
         }
